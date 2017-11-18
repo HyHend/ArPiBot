@@ -30,8 +30,8 @@ bool ultrasonicSensorServoAngleIncreasing = false;
 int requiredUltrasonicSensorServoAngle = 90;
 
 // Array with ultrasonic measured distances (6 degree buckets)
-//int ultrasonicDistances[30] = {1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000,
-//                              1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
+int ultrasonicDistances[30] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                              255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
 
 // Minimal moving time for servo
 int servoMinMovingTime = 10;
@@ -43,6 +43,8 @@ int sensorAngleLoopMillis = 50;
 unsigned long previousSensorAngleLoopMillis = 0;
 int ultrasonicSensorLoopMillis = 14;    // 180deg, 420ms, 14ms, 30 measurements 
 unsigned long previousUltrasonicSensorLoopMillis = 0;
+int serialOutLoopMillis = 100;
+unsigned long previousSerialOutLoopMillis = 0;
 
 // Start of us measurement
 unsigned long ultrasonicMeasureStart = 0;
@@ -280,120 +282,24 @@ void loop()
     //TODO motor
     //TODO ultrasonicSensor
   }
-//  if((previousMotorLoopMillis + motorLoopMillis) < currentMillis) {
-//    previousMotorLoopMillis = currentMillis;
-//
-//    // Runtime
-//    // Get closest distance
-//    int lowest = 0;
-//    for(int i = 0; i < 30; i++) {
-//      if(ultrasonicDistances[i] < ultrasonicDistances[lowest]) {
-//        lowest = i;
-//      }
-//    }
-//
-//    // Define distances
-//    int veryNear = 15;
-//    int near = 30;
-//    int medNear = 75;
-//
-//    // Follow nearest object with ultrasonic sensor
-//    if(ultrasonicDistances[lowest] > medNear) {
-//      // Rotate sensor
-//      moveUltrasonicSensorBetween(0, 180, currentMillis, false);
-//    }
-//    else if(ultrasonicDistances[lowest] > near
-//        && ultrasonicDistances[lowest] <= medNear) {
-//      // Rotate sensor
-//      int minDeg = max(0, (lowest*6) - 54);
-//      int maxDeg = min(180, (lowest*6) + 54);
-//    }
-//    else if(ultrasonicDistances[lowest] <= near) {
-//      // Drive
-//      int rotation = 0;
-//      int velocity = 130;
-//      _mDrive(velocity, rotation);
-//      
-//      // Rotate sensor
-//      int minDeg = max(0, (lowest*6) - 24);
-//      int maxDeg = min(180, (lowest*6) + 24);
-//      moveUltrasonicSensorBetween(minDeg, maxDeg, currentMillis, true);
-//    }
-//
-//    // Steer clear, but folow objects
-//    // If ahead is not possible, go back
-//    int velocity;
-//    int rotation;
-//    boolean aheadVeryNearClear = true;
-//    boolean aheadNearClear = true;
-//    boolean aheadMedNearClear = true;
-//    for(int i = 11; i <= 18; i++) {
-//      if(ultrasonicDistances[i] < veryNear) {
-//        aheadVeryNearClear = false;
-//      }
-//      if(ultrasonicDistances[i] < near) {
-//        aheadNearClear = false;
-//      }
-//      if(ultrasonicDistances[i] < medNear) {
-//        aheadMedNearClear = false;
-//      }
-//    }
-//
-//    // If there's an object ahead, right in front, deal with it NOW
-//    if(!aheadVeryNearClear) {
-//      // Is right or left clear?, go back in that direction
-//      int rightMinDistance = 100;
-//      int leftMinDistance = 100;
-//      for(int i = 0; i < 5; i++) {
-//        if(ultrasonicDistances[i] < rightMinDistance) {
-//          rightMinDistance = ultrasonicDistances[i];
-//        }
-//      }
-//      for(int i = 25; i < 30; i++) {
-//        if(ultrasonicDistances[i] < leftMinDistance) {
-//          leftMinDistance = ultrasonicDistances[i];
-//        }
-//      }
-//
-//      // Choose free direction
-//      if(rightMinDistance > near
-//          && rightMinDistance > leftMinDistance) {
-//        velocity = -140;
-//        rotation = 127 + max((int) round(rightMinDistance / 4), 100);
-//      }
-//      else if(leftMinDistance > near
-//        && rightMinDistance <= leftMinDistance) {
-//        velocity = -140;
-//        rotation = -127 - max((int) round(leftMinDistance / 4), 100);
-//      }
-//      else {
-//        velocity = -90;
-//        rotation = 0;
-//      }
-//    }
-//    // Elseif is temporarily (TODO)
-//    else if(currentVelocity > 0 
-//        || aheadMedNearClear) {
-//      velocity = 76;
-//      rotation = 0;
-//    }
-//    else if(currentVelocity > 0 
-//        || aheadNearClear) {
-//      velocity = 40;
-//      rotation = 0;
-//    }
-//    _mDrive(velocity, rotation);
-//
-//    // At random moments, print distances
-//    if(random(0, 20) == 7) {
-//      Serial.print("Dst: [");
-//      for(int i = 0; i < 30; i++) {
-//        Serial.print(ultrasonicDistances[i]);
-//        if(i < 29){ Serial.print(", "); };
-//      }
-//      Serial.println("]");
-//    }
-//  }
+
+  // Serial output runtime
+  if((previousSerialOutLoopMillis + serialOutLoopMillis) < currentMillis) {
+    previousSerialOutLoopMillis = currentMillis;
+
+    // Runtime
+    // Print current Serial status
+    Serial.print("USM ");
+    Serial.print(currentMillis);
+//    Serial.print(" ");
+    for(int i=0; i<30; i=i+1) {
+      Serial.print(" ");
+      Serial.print(ultrasonicDistances[i]);
+//      unsigned char byteAsChar = max(ultrasonicDistances[i], 255);
+//      Serial.print(byteAsChar);
+    }
+    Serial.print("\n");
+  }
 
   // Ultrasonic Sensor angle/init runtime
   if((previousSensorAngleLoopMillis + sensorAngleLoopMillis) < currentMillis) {
@@ -458,25 +364,25 @@ void loop()
 
 //    // Save measurement in correct bucket
     int currentBucket = (int) round(min(currentAngle, 180) / 6);  // 30 buckets of 6 degrees width
-//    if(ultrasonicMeasureDistance <= 200) {
-//      // Note: A high distance probably indicates an incorrect measurement (TODO or no obstacles at all?)
-//      //       For example, there could be sound absorbing material in front of the sensor
-//      // .     We don't save these large values (TODO is this the best solution?)
-//      ultrasonicDistances[currentBucket] = ultrasonicMeasureDistance;
-//    }
+    if(ultrasonicMeasureDistance <= 200) {
+      // Note: A high distance probably indicates an incorrect measurement (TODO or no obstacles at all?)
+      //       For example, there could be sound absorbing material in front of the sensor
+      // .     We don't save these large values (TODO is this the best solution?)
+      ultrasonicDistances[currentBucket] = ultrasonicMeasureDistance;
+    }
 
     // Send current bucket measurement over serial
     // USM (int)angle (int)measuredDistanceCM
-    Serial.print("USM ");
-    Serial.print(currentMillis);
-    Serial.print(" ");
-    Serial.print((currentBucket*6));
-    Serial.print(" ");
-    Serial.println((int) ultrasonicMeasureDistance);
+//    Serial.print("USM ");
+//    Serial.print(currentMillis);
+//    Serial.print(" ");
+//    Serial.print((currentBucket));
+//    Serial.print(" ");
+//    Serial.println((int) ultrasonicDistances[currentBucket]);
 
     // RST
     ultrasonicMeasureStart = 0;
     ultrasonicResultStart = 0;
-  }                   
+  }
 }
 
