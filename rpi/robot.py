@@ -12,10 +12,10 @@ import os
 # SERIAL
 VERSION = "v0.0.0"
 IMAGE_INTERVAL = 1
-SERIAL_INTERVAL = 0.001
+SERIAL_INTERVAL = 0.0001
 ACTION_INTERVAL = 0.5
 IMAGE_PATH = "/home/pi/robot/imgs"
-LOG_LEVEL = 1;                    #0=debug, 1=info, 3=warn, 4=error
+LOG_LEVEL = 0;                    #0=debug, 1=info, 3=warn, 4=error
 ULTRASONICSENSOR_DATA = {}        # Distance values. One list per bucket
 ULTRASONICSENSOR_TIMESTAMPS = {}  # Timestamps. One list per bucket
 MAX_HISTORY = 100                 # Max amt of measurements. Albeit imgs, ultrasonics
@@ -153,24 +153,36 @@ def read_serial():
   Calls add_ultrasonic_sensor_measurement for further processing
 
   Format:
-  USM (int)angle (int)measuredDistanceCM
+  U\tmilliSeconds\t(int)angle\t(int)measuredDistanceCM\n
   """
   log(0, "Waiting for serial input")
   buffer_string = ''
   while True:
-    buffer_string = buffer_string + SERIAL.read(SERIAL.inWaiting())
+    buffer_string = buffer_string + SERIAL.read(size=1)   # SERIAL.inWaiting()
     if '\n' in buffer_string:
       lines = buffer_string.split('\n') # Guaranteed to have at least 2 entries
       line = lines[-2]
       log(0, "Serial: {0}".format(line))
       
-      parts = line.split(" ")
-      if len(parts) == 4 and parts[0] == "USM":
+      parts = line.split("\t")
+      if len(parts) == 4 and parts[0] == "U":
         # Parse ultrasonic measurement
         log(0, "Serial: {0}".format(line))
+
         add_ultrasonic_sensor_measurement(parts[1], parts[2], parts[3])
+        # try:
+        #   t = ord(parts[0])
+        #   b = ord(parts[1])
+        #   v = ord(parts[2])
+
+        #   add_ultrasonic_sensor_measurement(t, b, v)
+        # except:
+        #   log(2, "Failed parsing all values. {0}".format(line))
       else:
-        log(1, "Did not parse line. Format not recognised. {0} {1}".format(line, parts[0]))
+        log(2, "Did not parse line. Format not recognised. {0} {1}".format(line, parts[0]))
+
+      SERIAL.flushOutput()    # Empty output buffer
+      SERIAL.flushInput()    # Empty output buffer
 
       break;
 

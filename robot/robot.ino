@@ -30,8 +30,8 @@ bool ultrasonicSensorServoAngleIncreasing = false;
 int requiredUltrasonicSensorServoAngle = 90;
 
 // Array with ultrasonic measured distances (6 degree buckets)
-int ultrasonicDistances[30] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-                              255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+//int ultrasonicDistances[30] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+//                              255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
 
 // Minimal moving time for servo
 int servoMinMovingTime = 10;
@@ -41,10 +41,10 @@ int motorLoopMillis = 100;
 unsigned long previousMotorLoopMillis = 0;
 int sensorAngleLoopMillis = 50;
 unsigned long previousSensorAngleLoopMillis = 0;
-int ultrasonicSensorLoopMillis = 14;    // 180deg, 420ms, 14ms, 30 measurements 
+int ultrasonicSensorLoopMillis = 100;    // 180deg, 420ms, 14ms, 30 measurements (would be 14ms)
 unsigned long previousUltrasonicSensorLoopMillis = 0;
-int serialOutLoopMillis = 100;
-unsigned long previousSerialOutLoopMillis = 0;
+//int serialOutLoopMillis = 100;
+//unsigned long previousSerialOutLoopMillis = 0;
 
 // Start of us measurement
 unsigned long ultrasonicMeasureStart = 0;
@@ -283,23 +283,23 @@ void loop()
     //TODO ultrasonicSensor
   }
 
-  // Serial output runtime
-  if((previousSerialOutLoopMillis + serialOutLoopMillis) < currentMillis) {
-    previousSerialOutLoopMillis = currentMillis;
-
-    // Runtime
-    // Print current Serial status
-    Serial.print("USM ");
-    Serial.print(currentMillis);
-//    Serial.print(" ");
-    for(int i=0; i<30; i=i+1) {
-      Serial.print(" ");
-      Serial.print(ultrasonicDistances[i]);
-//      unsigned char byteAsChar = max(ultrasonicDistances[i], 255);
-//      Serial.print(byteAsChar);
-    }
-    Serial.print("\n");
-  }
+//  // Serial output runtime
+//  if((previousSerialOutLoopMillis + serialOutLoopMillis) < currentMillis) {
+//    previousSerialOutLoopMillis = currentMillis;
+//
+//    // Runtime
+//    // Print current Serial status
+//    Serial.print("USM ");
+//    Serial.print(currentMillis);
+////    Serial.print(" ");
+//    for(int i=0; i<30; i=i+1) {
+//      Serial.print(" ");
+//      Serial.print(ultrasonicDistances[i]);
+////      unsigned char byteAsChar = max(ultrasonicDistances[i], 255);
+////      Serial.print(byteAsChar);
+//    }
+//    Serial.print("\n");
+//  }
 
   // Ultrasonic Sensor angle/init runtime
   if((previousSensorAngleLoopMillis + sensorAngleLoopMillis) < currentMillis) {
@@ -362,23 +362,16 @@ void loop()
       }
     }
 
-//    // Save measurement in correct bucket
-    int currentBucket = (int) round(min(currentAngle, 180) / 6);  // 30 buckets of 6 degrees width
-    if(ultrasonicMeasureDistance <= 200) {
-      // Note: A high distance probably indicates an incorrect measurement (TODO or no obstacles at all?)
-      //       For example, there could be sound absorbing material in front of the sensor
-      // .     We don't save these large values (TODO is this the best solution?)
-      ultrasonicDistances[currentBucket] = ultrasonicMeasureDistance;
-    }
-
-    // Send current bucket measurement over serial
-    // USM (int)angle (int)measuredDistanceCM
-//    Serial.print("USM ");
-//    Serial.print(currentMillis);
-//    Serial.print(" ");
-//    Serial.print((currentBucket));
-//    Serial.print(" ");
-//    Serial.println((int) ultrasonicDistances[currentBucket]);
+    // Send current measurement over serial
+    // U\tmillisModulo\t(int)angle\t(int)measuredDistanceCM\n
+    Serial.write("U");
+    Serial.write("\t");
+    Serial.print((byte) (min(255, currentMillis % 255)));
+    Serial.write("\t");
+    Serial.print((byte) (min(255, currentAngle)));
+    Serial.write("\t");
+    Serial.print((byte) (min(255, ultrasonicMeasureDistance)));
+    Serial.write("\n");
 
     // RST
     ultrasonicMeasureStart = 0;
