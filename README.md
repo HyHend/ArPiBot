@@ -12,7 +12,14 @@ As standard, the bot cannot look around and change behavoir at the same time due
 
 This software version and comparable simple behaviour is implemented in the "standalone" folder
 
+Behaviour:
+- Asynchronously readout ultrasonic sensor measurements
+- Simply act on measurements and control motors
+- Drive straight untill obstacle is detected. Simple "calculation" to find best way out. (Possibly back away and drive an available direction. Or simply adjust forward course)
+
 ### Arduino with Raspberry Pi
 The bot's Arduino will perform rudimentary communication with the Raspberry Pi. It can be found in the "arduino_with_rpi" folder.
+- Arduino USB connected to RPi USB. 
+- Serial communication
 - Sensor measurements from Arduino -> RPi
 - Control commands from RPi -> Arduino (Aim sensor, retrieve sensor value, drive speed, drive direction)
