@@ -1,7 +1,7 @@
 # ArPiBot
-This project is based on the following hardware robot: [Eeleego robot car kit (2.0)](https://www.elegoo.com/product/elegoo-uno-project-upgraded-smart-robot-car-kit-v2-0/)[(other link)](http://robotfanatics.com/elegoo-smart-car-review/)
+This project is based on the following hardware robot: [Elegoo robot car kit (2.0)](https://www.elegoo.com/product/elegoo-uno-project-upgraded-smart-robot-car-kit-v2-0/)[(review)](http://robotfanatics.com/elegoo-smart-car-review/)
 
-### Video on YouTube (not mine)
+### Video on YouTube (from [review](http://robotfanatics.com/elegoo-smart-car-review/))
 This video shows the basic default behavior of this bot. It drives, looks around and avoids obstacles.
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=f8ZBd4TpMBg
 " target="_blank"><img src="http://img.youtube.com/vi/f8ZBd4TpMBg/0.jpg" 
