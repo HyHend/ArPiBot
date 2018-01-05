@@ -6,7 +6,8 @@ import serial
 import serial.tools.list_ports
 import os
 # import numpy
-
+#Idea: Rewrite communication to simple version: "Get distance" -> distance "Move and get" -> move and get. 
+# so not continuous
 
 # CAMERA
 # SERIAL
