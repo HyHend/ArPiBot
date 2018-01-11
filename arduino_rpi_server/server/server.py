@@ -6,8 +6,8 @@ import json
 
 LOG_LEVEL = 0                     # 0=debug, 1=info, 3=warn, 4=error
 PRINT_LOG_WEBSOCKET = False       # True will print log lines over websocket connection
-HOST = "192.168.178.13"
-PORT = 5912
+HOST = "x.x.x.x"
+PORT = 5000
 
 
 app = Flask(__name__)
