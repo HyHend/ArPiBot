@@ -13,6 +13,9 @@ PORT = 5000
 app = Flask(__name__)
 socketio = SocketIO(app, logger=False)
 
+@app.route('/')
+def root():
+    return app.send_static_file('index.html')
 
 @socketio.on('robot')
 def handle_robot_message(message):

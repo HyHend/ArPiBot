@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Robot control</title>
+    <style>
+      * { 
+        margin: 0; 
+        padding: 0; 
+        box-sizing: border-box; 
+      }
+      body { 
+        font: 13px Helvetica, Arial; 
+      }
+      #control_area {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+      #dot {
+        position: absolute;
+        user-select: none;
+        width: 10px;
+        height: 10px;
+        background: #000;
+        border-radius: 20px;
+        left:50%;
+        top:50%;
+        margin-left: -5px;
+        margin-top: -5px;
+      } 
+    </style>
+  </head>
+  <body onload="javascript:init();">
+    <div id="control_area">
+      <div id="dot"></div>  
+    </div>
+    
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      var mouseIsDown = false;
+      var screenDimensions = {};
+      var lastSentControl = {'velocity':0, 'rotation':0};
+      var lastSentControlTime = 0;
+      var minUsBetweenSentControl = 100;
+      var fromCenter = {};
+      var socket;
+
+      var init = function() {
+        // Socket init
+        socket = io('http://x.x.x.x:5000');
+        socket.on('connect', function(){});
+        socket.on('webcl', function(data){ receiveOverSocket(data); });
+        socket.on('disconnect', function(){});
+
+        // Mouse events
+        document.getElementById("control_area").addEventListener("mousedown", mainMouseDown);
+        document.getElementById("control_area").addEventListener("mouseup", mainMouseUp);
+        document.getElementById("control_area").addEventListener("mousemove", mainMouseMove);
+
+        // Document dimensions
+        screenDimensions['width'] = window.innerWidth;
+        screenDimensions['height'] = window.innerHeight;
+      };
+
+      var mainMouseDown = function(e) {
+        // console.log(e);
+        mouseIsDown = true;
+      };
+
+      var mainMouseUp = function(e) {
+        // console.log(e);
+        mouseIsDown = false;
+
+        // Stop robot
+        sendDriveControls(0,0);
+      };
+
+      var computeControlFromDistance = function(distance) {
+        // Normalize
+        var normalized = {
+          "x": (distance.x / (screenDimensions.width / 2)),
+          "y": (distance.y / (screenDimensions.height / 2))
+        };
+
+        var velocity_multiplier = 255;
+        var rotation_multiplier = 255;
+
+        var velocity = (-normalized.y) * velocity_multiplier;
+        var rotation = (-normalized.x) * rotation_multiplier;
+
+        return {"velocity": velocity, "rotation": rotation};
+      };
+
+      var mainMouseMove = function(e) {
+        if(mouseIsDown) {
+          fromCenter['x'] = e.clientX - (screenDimensions.width / 2);
+          fromCenter['y'] = e.clientY - (screenDimensions.height / 2);
+          if(Date.now() - minUsBetweenSentControl > lastSentControlTime) {
+            driveControls = computeControlFromDistance(fromCenter);
+
+            // Send drive controls over socket (only when significant difference)
+            if(Math.abs((lastSentControl.velocity + 255) - (driveControls.velocity + 255)) > 10
+              || Math.abs((lastSentControl.rotation + 255) - (driveControls.rotation + 255)) > 10) {
+              sendDriveControls(driveControls.velocity, driveControls.rotation);
+              lastSentControl = driveControls;
+              lastSentControlTime = Date.now();
+            }
+          }
+        }
+      };
+
+      var sendDriveControls = function(velocity, rotation) {
+        console.log("Sending drive controls",Math.floor(velocity),Math.floor(rotation));
+        socket.emit('webcl', '{"ROBOT":{"DRIVE":{"velocity":'+Math.floor(velocity)+', "rotation":'+Math.floor(rotation)+'}}}');
+      };
+
+      var receiveOverSocket = function(data) {
+        console.log(data);
+      };
+    </script>
+  </body>
+</html>
